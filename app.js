@@ -8,6 +8,8 @@ var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var distancematrixRouter = require('./routes/distancematrix');
 
+var geo_helper = require('./geo-helper.js');
+
 var app = express();
 
 var redis = require("redis"),
@@ -35,11 +37,11 @@ var locationSet = {
     'Mumbai': {latitude: 18.9750, longitude: 72.8258}
 };
 
-geo.addLocations(locationSet, function (err, reply) {
-    if (err) console.error(err)
-    else console.log('added locations:', reply)
-});
-
+// --------------------------------
+// geo.addLocations(locationSet, function (err, reply) {
+//     if (err) console.error(err)
+//     else console.log('added locations:', reply)
+// });
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -70,5 +72,8 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
+
+
+geo_helper.initDriverLatLongData().then(e => console.log('Successfully initialized drivers.'));
 
 module.exports = app;
