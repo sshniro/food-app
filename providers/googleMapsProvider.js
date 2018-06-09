@@ -8,20 +8,22 @@ module.exports = {
 	calculateDistance: calculateDistance
 };
 
-function calculateDistance(originLatitude, originLongitude, destinationLatitude, destinationLongitude){
+function calculateDistance(json){
 
 	var options = { 
 		method: 'GET',
 		url: 'https://maps.googleapis.com/maps/api/distancematrix/json',
 		qs: { 
 			units: 'imperial',
-			origins: originLatitude + ',' + originLongitude,
-			destinations: destinationLatitude + ',' + destinationLongitude
+			origins: json.origins,
+			destinations: json.destinations
 		},
-		headers: { 
+		headers: {
 			'cache-control': 'no-cache' 
 		} 
 	};
+
+	console.log(options)
 
 	return new Promise(function (resolve, reject) {
 
