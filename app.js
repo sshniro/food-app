@@ -33,7 +33,7 @@ var locationSet = {
     'Ottawa': {latitude: 45.4167, longitude: -75.7000},
     'Calgary': {latitude: 51.0833, longitude: -114.0833},
     'Mumbai': {latitude: 18.9750, longitude: 72.8258}
-}
+};
 
 geo.addLocations(locationSet, function (err, reply) {
     if (err) console.error(err)
