@@ -4,12 +4,12 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
-var driversRouter = require('./routes/drivers');
-var googleMapsRouter = require('./routes/google-maps');
+const indexRouter = require('./routes/index');
+const usersRouter = require('./routes/users');
+const driversRouter = require('./routes/drivers');
+const googleMapsRouter = require('./routes/google-maps');
 
-var geo_helper = require('./geo-helper.js');
+const geo_helper = require('./geo-helper.js');
 
 var app = express();
 
