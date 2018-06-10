@@ -50,4 +50,13 @@ geo_helper.initDriverLatLongData().then(e => console.log('Successfully initializ
 console.log('Google Maps API: GET http://localhost:3000/maps/distancematrix/')
 console.log('Driver API: GET http://localhost:3000/drivers/')
 
+const PORT = process.env.PORT || 3000;
+
+if (module === require.main) {
+    // Start the server
+    const server = app.listen(PORT, () => {
+        console.log(`App listening on port ${PORT}`);
+    });
+}
+
 module.exports = app;
