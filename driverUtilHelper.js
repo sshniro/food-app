@@ -1,10 +1,15 @@
-const geo_helper = require('geo-helper');
-const configs = require('config/baseConfig');
+'use strict';
 
-function getDriverGroupedByDistanceAndSortByRating(latLong) {
-    let destinationJson = {
-        destination : latLong || '6.850740,79.873541'
-    };
+const sortJsonArray = require('sort-json-array');
+
+const geo_helper = require('./geo-helper');
+const configs = require('./config/baseConfig');
+
+module.exports = {
+    getDriverGroupedByDistanceAndSortByRating: getDriverGroupedByDistanceAndSortByRating
+};
+
+function getDriverGroupedByDistanceAndSortByRating(destinationJson) {
 
     let destinationSplit = destinationJson.destination.split(',');
 
