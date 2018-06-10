@@ -6,7 +6,8 @@ const logger = require('morgan');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
-var distancematrixRouter = require('./routes/distancematrix');
+var driversRouter = require('./routes/drivers');
+var googleMapsRouter = require('./routes/google-maps');
 
 var geo_helper = require('./geo-helper.js');
 
@@ -24,7 +25,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
-app.use('/distancematrix', distancematrixRouter);
+app.use('/drivers', driversRouter);
+app.use('/maps', googleMapsRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -44,5 +46,8 @@ app.use(function(err, req, res, next) {
 
 
 geo_helper.initDriverLatLongData().then(e => console.log('Successfully initialized drivers.'));
+
+console.log('Google Maps API: GET http://localhost:3000/maps/distancematrix/')
+console.log('Driver API: GET http://localhost:3000/drivers/')
 
 module.exports = app;

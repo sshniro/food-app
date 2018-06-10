@@ -29,10 +29,12 @@ function calculateDistance(json){
 		request(options, function (error, response, body) {
 			if (error) return reject(error);
 
-            if (body.status !== 'INVALID_REQUEST') {
-                return resolve(body);
+			let tempResponseBody = JSON.parse(body);
+
+            if (tempResponseBody.status !== 'INVALID_REQUEST' && tempResponseBody.status !== 'REQUEST_DENIED') {
+                return resolve(tempResponseBody);
             }else{
-                return reject(error);
+                return reject(tempResponseBody);
             }
         });
 
