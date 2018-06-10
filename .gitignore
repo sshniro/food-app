@@ -15,3 +15,6 @@ build/Release
 
 # Dependency directory
 node_modules
+
+# configuration for the app
+# config/baseConfig.js
