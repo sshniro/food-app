@@ -35,7 +35,7 @@ const getCoordinatesOfMultipleDrivers = (driverIdArray) => {
     geo.locations(driverIdArray, function (err, locations) {
         if (err) console.error(err)
         else {
-            for (var locationName in locations) {
+            for (let locationName in locations) {
                 console.log(locationName + "'s location is:", locations[locationName].latitude, locations[locationName].longitude)
             }
         }
@@ -47,6 +47,17 @@ const defaultSearchForNearByVehicles = (lat, long, distanceInMeter) => {
         if (err) console.error(err);
         else console.log('nearby locations:', locations)
     })
+};
+
+const persistInRedis = (key, value) => {
+    client.set(key, value, redis.print);
+};
+
+const getFromRedis = (key) => {
+    client.get(key, function(err, reply) {
+        // reply is null when the key is missing
+        console.log(reply);
+    });
 };
 
 function getNearByVehicles(lat, long) {
@@ -65,11 +76,10 @@ function getNearByVehicles(lat, long) {
         // look for all points within ~5000m of Toronto with the options.
         geo.nearby({latitude: lat, longitude: long}, 5000, options, function (err, locations) {
             if (err) {
-                console.error(err)
+                console.error(err);
                 reject();
             }
             // else console.log('nearby locations:', locations)
-
             resolve(locations);
         });
     });
@@ -86,13 +96,17 @@ function initDriverLatLongData() {
             }
             else console.log('added locations:', reply);
             resolve({'dataInserted': reply});
-        });
-    })
+});
+})
 }
+
+persistInRedis("test", "value form niro");
+getFromRedis("test");
 
 
 module.exports = {
     initDriverLatLongData: initDriverLatLongData,
     getNearByVehicles: getNearByVehicles,
+    persist : persistInRedis,
     locationSet: locationSet
 };
