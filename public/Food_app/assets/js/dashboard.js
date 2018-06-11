@@ -1,14 +1,23 @@
 $(document).ready(function() {
 
-    functions.onStartInit($('#orderIdSelect').val());
+    // functions.onStartInit($('#orderIdSelect').val());
 
     $('#orderIdSelect').change(function() {
         functions.onStartInit($('#orderIdSelect').val());
+
+        if (markersArray) {
+            for (i in markersArray) {
+                markersArray[i].setMap(null);
+            }
+            markersArray.length = 0;
+        }
     });
 
     setInterval(function(){
         functions.onStartInit($('#orderIdSelect').val());
     }, 5000);
+
+    functions.mapInit();
 
 });
 
@@ -82,6 +91,15 @@ let functions = {
                         '</tr>');
                 }
             }
+
+            let marker = new google.maps.Marker({
+                map: map,
+                draggable: false,
+                icon: 'file:///Users/nikethanselvanathan/Node/food-app/public/Food_app/assets/img/car.png',
+                position: new google.maps.LatLng(populatingData.notifiedDrivers[i].latitude, populatingData.notifiedDrivers[i].longitude)
+            });
+
+            markersArray.push(marker);
         }
 
     }, acceptOrder: function (orderId, driverId) {
@@ -116,6 +134,18 @@ let functions = {
 
         });
 
+    }, mapInit : function initialize() {
+         let mapDiv = document.getElementById('map-canvas');
+         map = new google.maps.Map(mapDiv, {
+            center: new google.maps.LatLng(6.84, 79.89),
+            zoom: 13,
+            mapTypeId: google.maps.MapTypeId.ROADMAP
+         });
+
+        // google.maps.event.addDomListener(window, 'load', initialize);
+
     }
 
 };
+
+let map, markersArray = [];
