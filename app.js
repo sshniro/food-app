@@ -49,6 +49,7 @@ app.use(function(err, req, res, next) {
 
 geo_helper.initDriverLatLongData().then(e => console.log('Successfully initialized drivers.'));
 
+console.log('UI: ///food-app/public/Food_app/index.html')
 console.log('Google Maps API: GET http://localhost:3000/maps/distancematrix/')
 console.log('Driver API: GET http://localhost:3000/drivers?orderId=testId2')
 console.log('Order API: GET http://localhost:3000/orders?orderId=testId2')
