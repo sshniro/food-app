@@ -1,6 +1,6 @@
 $(document).ready(function() {
 
-    // functions.onStartInit($('#orderIdSelect').val());
+    functions.onStartInit($('#orderIdSelect').val());
 
     $('#orderIdSelect').change(function() {
         functions.onStartInit($('#orderIdSelect').val());
@@ -141,8 +141,6 @@ let functions = {
             zoom: 13,
             mapTypeId: google.maps.MapTypeId.ROADMAP
          });
-
-        // google.maps.event.addDomListener(window, 'load', initialize);
 
     }
 
