@@ -54,9 +54,12 @@ const persistInRedis = (key, value) => {
 };
 
 const getFromRedis = (key) => {
-    client.get(key, function(err, reply) {
-        // reply is null when the key is missing
-        console.log(reply);
+    return new Promise(function (resolve, reject) {
+        client.get(key, function(err, reply) {
+            // reply is null when the key is missing
+            // console.log(reply);
+            resolve(reply);
+        });
     });
 };
 
@@ -100,13 +103,13 @@ function initDriverLatLongData() {
 })
 }
 
-persistInRedis("test", "value form niro");
-getFromRedis("test");
-
+// persistInRedis("test", "value form niro");
+// getFromRedis("test");
 
 module.exports = {
     initDriverLatLongData: initDriverLatLongData,
     getNearByVehicles: getNearByVehicles,
-    persist : persistInRedis,
+    persistInRedis: persistInRedis,
+    getFromRedis: getFromRedis,
     locationSet: locationSet
 };

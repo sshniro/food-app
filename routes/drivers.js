@@ -9,7 +9,9 @@ const driverUtilHelper = require('../driverUtilHelper.js');
 router.get('/', function(req, res, next) {
 
     let destinationJson = {
-        destination : req.query.destination || '6.850740,79.873541'
+        orderId : req.query.orderId || 'testId1',
+        origin: req.query.origin || '6.850740,79.873541',
+        destination: req.query.destination || '6.794126,79.908880'
     };
 
     driverUtilHelper.getDriverGroupedByDistanceAndSortByRating(destinationJson).then(function (driverUtilHelperResponse) {

@@ -7,6 +7,7 @@ const logger = require('morgan');
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 const driversRouter = require('./routes/drivers');
+const ordersRouter = require('./routes/orders');
 const googleMapsRouter = require('./routes/google-maps');
 
 const geo_helper = require('./geo-helper.js');
@@ -27,6 +28,7 @@ app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/drivers', driversRouter);
 app.use('/maps', googleMapsRouter);
+app.use('/orders', ordersRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -48,7 +50,9 @@ app.use(function(err, req, res, next) {
 geo_helper.initDriverLatLongData().then(e => console.log('Successfully initialized drivers.'));
 
 console.log('Google Maps API: GET http://localhost:3000/maps/distancematrix/')
-console.log('Driver API: GET http://localhost:3000/drivers/')
+console.log('Driver API: GET http://localhost:3000/drivers?orderId=testId2')
+console.log('Order API: GET http://localhost:3000/orders?orderId=testId2')
+console.log('Order API: POST http://localhost:3000/orders, JSON: { "orderId": "testId2", "driverId": "driver09-bekariya-junction" }')
 
 const PORT = process.env.PORT || 3000;
 
