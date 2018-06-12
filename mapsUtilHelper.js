@@ -58,6 +58,8 @@ function calculateDistanceMatrixFromOriginsToDestinations(originToDestination) {
             }
 
             // resolve(googleMapsProviderResponse);
+            // resolve(groups);
+
             if(groups.length > 0){
                 resolve(groups[0]);
             }else {

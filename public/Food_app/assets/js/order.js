@@ -40,6 +40,7 @@ let functions = {
 
     }, mapInit : function initialize() {
         let mapDiv = document.getElementById('map-canvas');
+
         map = new google.maps.Map(mapDiv, {
             center: new google.maps.LatLng(6.84, 79.89),
             zoom: 12,
@@ -53,6 +54,39 @@ let functions = {
             }
             markersArray.length = 0;
         }
+    }, getUserCurrentAddress: function(){
+
+        let infoWindow = new google.maps.InfoWindow({map: map});
+
+        if (navigator.geolocation) {
+
+            navigator.geolocation.getCurrentPosition(function(position) {
+
+                let pos = {
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude
+                };
+
+                map.setCenter(pos);
+
+                functions.calculateDistance($('#foodStoreLatitudeAndLongitude').attr('dataFoodStoreLatitudeAndLongitude'), pos.lat + ',' + pos.lng);
+                functions.addMarker('User', pos.lat, pos.lng);
+
+            }, function() {
+                handleLocationError(true, infoWindow, map.getCenter());
+            });
+        } else {
+            // Browser doesn't support Geo location
+            handleLocationError(false, infoWindow, map.getCenter());
+        }
+
+        function handleLocationError(browserHasGeolocation, infoWindow, pos) {
+            infoWindow.setPosition(pos);
+            infoWindow.setContent(browserHasGeolocation ?
+                'Error: The Geolocation service failed.' :
+                'Error: Your browser doesn\'t support geolocation.');
+        }
+
     }, addMarker: function(type, latitude, longitude){
 
         let markerobject = new google.maps.Marker({
@@ -66,7 +100,7 @@ let functions = {
         if(type === 'Restaurant'){
 
             google.maps.event.addListener(markerobject, 'dragend', function(args){
-                functions.calculateDistance(args.latLng.lat() + ',' + args.latLng.lng(), $('#UserAddressLatitudeAndLongitude').attr('dataUserAddressLatitudeAndLongitude'))
+                functions.calculateDistance(args.latLng.lat() + ',' + args.latLng.lng(), $('#UserAddressLatitudeAndLongitude').attr('dataUserAddressLatitudeAndLongitude'));
             });
 
         }else{
@@ -88,10 +122,12 @@ let functions = {
                 'cache-control': 'no-cache'
             }
         };
-        console.log(settings.url);
 
         $.ajax(settings).done(function (response) {
+
             if(response.length > 0){
+                response[0].destination = userAddressLatitudeAndLongitude;
+                response[0].origin = foodStoreLatitudeAndLongitude;
                 functions.setInputValuse(response[0]);
             }
         });
@@ -114,10 +150,10 @@ let functions = {
 
             functions.setInputValuse(response);
             let originSplit = response.origin.split(',');
-            let destinationSplit = response.destination.split(',');
 
             functions.addMarker('Restaurant', originSplit[0], originSplit[1]);
-            functions.addMarker('User', destinationSplit[0], destinationSplit[1]);
+            functions.getUserCurrentAddress();
+
         });
 
     }, setInputValuse: function(response){

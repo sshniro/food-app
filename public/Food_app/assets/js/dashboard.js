@@ -175,7 +175,7 @@ let functions = {
          let mapDiv = document.getElementById('map-canvas');
          map = new google.maps.Map(mapDiv, {
             center: new google.maps.LatLng(6.84, 79.89),
-            zoom: 13,
+            zoom: 12,
             mapTypeId: google.maps.MapTypeId.ROADMAP
          });
 
