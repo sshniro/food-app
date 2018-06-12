@@ -44,10 +44,10 @@ function getDriverGroupedByDistanceAndSortByRating(destinationJson) {
                 groups[i] = sortJsonArray(groups[i], 'rating', 'des');
             }
 
-            // resolve({row : groups});
-            resolve({status : 'Successfully notified the drivers.'});
-
-            notifyDrivers(groups, destinationJson);
+            resolve({
+                row : groups,
+                destinationJson: destinationJson
+            });
 
         }).catch(function (err) {
             console.log(err);

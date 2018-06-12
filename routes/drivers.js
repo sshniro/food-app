@@ -21,7 +21,10 @@ router.get('/', function(req, res, next) {
         for(key in mapsUtilHelperResponse) result[key] = mapsUtilHelperResponse[key];
 
         driverUtilHelper.getDriverGroupedByDistanceAndSortByRating(result).then(function (driverUtilHelperResponse) {
-            res.status(200).json(driverUtilHelperResponse);
+
+            driverUtilHelper.notifyDrivers(driverUtilHelperResponse.row, driverUtilHelperResponse.destinationJson);
+
+            res.status(200).json({status : 'Successfully notified the drivers.'});
         }).catch(function (err) {
             console.log(err);
             res.status(500).send(err);

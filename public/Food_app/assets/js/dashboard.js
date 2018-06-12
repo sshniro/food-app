@@ -50,9 +50,16 @@ let functions = {
 
 
 
-    }, onStartInit: function(id) {
+    }, addMarker: function(latitude, longitude){
+        let marker = new google.maps.Marker({
+            map: map,
+            draggable: false,
+            position: new google.maps.LatLng(latitude, longitude)
+        });
 
-        console.log('onStartInit Method Called')
+        markersArray.push(marker);
+
+    }, onStartInit: function(id) {
 
         let settings = {
             'async': true,
@@ -68,16 +75,19 @@ let functions = {
 
             $('#orderId').html(response.orderId);
             $('#orderStatus').html(response.orderStatus);
-            $('#orderOrigin').html(response.origin);
-            $('#orderDestination').html(response.destination);
+            $('#orderOrigin').html(response.origin_address);
+            $('#orderDestination').html(response.destination_address);
             $('#orderTimestamp').html(Date(response.timestamp));
+
+            let originSplit = response.origin.split(',');
+            let destinationSplit = response.destination.split(',');
+            functions.addMarker(originSplit[0], originSplit[1]);
+            functions.addMarker(destinationSplit[0], destinationSplit[1]);
 
             functions.populateTableRow(response);
 
         });
     }, populateTableRow: function(populatingData) {
-
-        console.log('populateTableRow Method Called');
 
         $('#oderListTableBody').html('');
 
