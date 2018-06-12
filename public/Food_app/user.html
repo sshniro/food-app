@@ -23,7 +23,7 @@
 
 <body class="">
     <div class="wrapper">
-        <div class="sidebar" data-color="purple" data-background-color="white" data-image="../assets/img/sidebar-1.jpg">
+        <div class="sidebar" data-color="purple" data-background-color="white" data-image="./assets/img/sidebar-1.jpg">
             <!--
         Tip 1: You can change the color of the sidebar using: data-color="purple | azure | green | orange | danger"
 
@@ -84,7 +84,7 @@
             <div class="content">
                 <div class="container-fluid">
                     <div class="row">
-                        <div class="col-md-8">
+                        <div class="col-md-9">
                             <div class="card">
 
 
@@ -99,7 +99,7 @@
                                                 <div class="form-group">
                                                     <label class="bmd-label-floating">Order Id</label>
                                                     <select class="form-control" id="orderId">
-                                                        <option value="testId1">testId1</option>
+                                                        <option value="testId1" selected>testId1</option>
                                                         <option value="testId2">testId2</option>
                                                         <option value="testId3">testId3</option>
                                                     </select>
@@ -111,18 +111,41 @@
                                             <div class="col-md-6">
                                                 <div class="form-group">
                                                     <label class="bmd-label-floating">Food Store Latitude & Longitude</label>
-                                                    <input type="text" class="form-control" id="foodStoreLatitudeAndLongitude">
+                                                    <input type="text" class="form-control" id="foodStoreLatitudeAndLongitude" value="6.841363514814405,79.88948501586913">
                                                 </div>
                                             </div>
+
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label class="bmd-label-floating">Distance</label>
+                                                    <input type="text" class="form-control" id="distance" value="2km" disabled>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label class="bmd-label-floating">Base Price</label>
+                                                    <input type="text" class="form-control" id="basePrice" value="500/=" disabled>
+                                                </div>
+                                            </div>
+
                                         </div>
 
                                         <div class="row">
                                             <div class="col-md-6">
                                                 <div class="form-group">
                                                     <label class="bmd-label-floating">User Address Latitude & Longitude</label>
-                                                    <input type="text" class="form-control" id="UserAddressLatitudeAndLongitude">
+                                                    <input type="text" class="form-control" id="UserAddressLatitudeAndLongitude" value="6.852612363417815,79.86819900512694">
                                                 </div>
                                             </div>
+
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label class="bmd-label-floating">Duration</label>
+                                                    <input type="text" class="form-control" id="duration" value="1h 50m" disabled>
+                                                </div>
+                                            </div>
+
                                         </div>
 
                                         <button onclick="functions.orderSubmit()" class="btn btn-primary pull-right">Order Food</button>
@@ -176,7 +199,8 @@
 <!-- Material Dashboard Core initialisations of plugins and Bootstrap Material Design Library -->
 <script src="assets/js/material-dashboard.js?v=2.0.0"></script>
 
-<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>
+<!--<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>-->
+
 <!-- demo init -->
 <script src="assets/js/plugins/demo.js"></script>
 

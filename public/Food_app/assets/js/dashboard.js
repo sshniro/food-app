@@ -1,36 +1,63 @@
 $(document).ready(function() {
-
-    functions.onStartInit($('#orderIdSelect').val());
-
-    $('#orderIdSelect').change(function() {
-        functions.onStartInit($('#orderIdSelect').val());
-
-        if (markersArray) {
-            for (i in markersArray) {
-                markersArray[i].setMap(null);
-            }
-            markersArray.length = 0;
-        }
-    });
-
-    setInterval(function(){
-        functions.onStartInit($('#orderIdSelect').val());
-    }, 5000);
-
-    functions.mapInit();
-
+    functions.getAPIkey();
 });
 
 
 let functions = {
-    onStartInit: function(id) {
+    getAPIkey: function () {
+
+        let settings = {
+            'async': true,
+            'crossDomain': true,
+            'url': window.location.origin + '/apiKey',
+            'method': 'GET',
+            'headers': {
+                'cache-control': 'no-cache'
+            }
+        };
+
+        $.ajax(settings).done(function (response) {
+
+            let loadScriptSettings = {
+                'async': true,
+                'crossDomain': true,
+                'dataType': 'script',
+                'url': 'https://maps.googleapis.com/maps/api/js?sensor=false&key=' + response.key
+            };
+
+            $.ajax(loadScriptSettings).done(function () {
+                functions.mapInit();
+
+                functions.onStartInit($('#orderIdSelect').val());
+
+                $('#orderIdSelect').change(function() {
+                    functions.onStartInit($('#orderIdSelect').val());
+
+                    if (markersArray) {
+                        for (i in markersArray) {
+                            markersArray[i].setMap(null);
+                        }
+                        markersArray.length = 0;
+                    }
+                });
+
+                setInterval(function(){
+                    functions.onStartInit($('#orderIdSelect').val());
+                }, 5000);
+            });
+        });
+
+
+
+
+    }, onStartInit: function(id) {
 
         console.log('onStartInit Method Called')
 
         let settings = {
             'async': true,
             'crossDomain': true,
-            'url': 'http://127.0.0.1:3000/orders?orderId=' + id,
+            'url': window.location.origin + '/orders?orderId=' + id,
             'method': 'GET',
             'headers': {
                 'cache-control': 'no-cache'
@@ -95,7 +122,7 @@ let functions = {
             let marker = new google.maps.Marker({
                 map: map,
                 draggable: false,
-                icon: 'file:///Users/nikethanselvanathan/Node/food-app/public/Food_app/assets/img/car.png',
+                icon: window.location.origin + '/Food_app/assets/img/car.png',
                 position: new google.maps.LatLng(populatingData.notifiedDrivers[i].latitude, populatingData.notifiedDrivers[i].longitude)
             });
 
@@ -110,16 +137,16 @@ let functions = {
         };
 
         var settings = {
-            "async": true,
-            "crossDomain": true,
-            "url": "http://127.0.0.1:3000/orders",
-            "method": "POST",
-            "headers": {
-                "content-type": "application/json",
-                "cache-control": "no-cache"
+            'async': true,
+            'crossDomain': true,
+            'url': window.location.origin + '/orders',
+            'method': 'POST',
+            'headers': {
+                'content-type': 'application/json',
+                'cache-control': 'no-cache'
             },
-            "processData": false,
-            "data": JSON.stringify(jsonData)
+            'processData': false,
+            'data': JSON.stringify(jsonData)
         }
 
         $.ajax(settings).done(function (response) {

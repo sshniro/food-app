@@ -6,7 +6,8 @@ const geo_helper = require('./geo-helper');
 const configs = require('./config/baseConfig');
 
 module.exports = {
-    getDriverGroupedByDistanceAndSortByRating: getDriverGroupedByDistanceAndSortByRating
+    getDriverGroupedByDistanceAndSortByRating: getDriverGroupedByDistanceAndSortByRating,
+    notifyDrivers: notifyDrivers
 };
 
 function getDriverGroupedByDistanceAndSortByRating(destinationJson) {
@@ -63,13 +64,12 @@ function notifyDrivers(sortedDriversByDistance, destinationJson) {
     let driverGroups = sortedDriversByDistance;
 
     let persistJson = {
-        orderId: destinationJson.orderId,
         orderStatus: 'REQUEST_PENDING',
         timestamp: Date.now(),
-        origin: destinationJson.origin,
-        destination: destinationJson.destination,
         notifiedDrivers: []
     };
+
+    for(let key in destinationJson) persistJson[key] = destinationJson[key];
 
     if(driverGroups.length > 0 && driverGroups[0].length > 0) {
         persistJson.notifiedDrivers.push(driverGroups[0][0]);

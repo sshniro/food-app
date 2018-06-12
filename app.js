@@ -54,6 +54,7 @@ console.log('Google Maps API: GET http://localhost:3000/maps/distancematrix/')
 console.log('Driver API: GET http://localhost:3000/drivers?orderId=testId2')
 console.log('Order API: GET http://localhost:3000/orders?orderId=testId2')
 console.log('Order API: POST http://localhost:3000/orders, JSON: { "orderId": "testId2", "driverId": "driver09-bekariya-junction" }')
+console.log('Google API Key: GET http://localhost:3000/apiKey')
 
 const PORT = process.env.PORT || 3000;
 
