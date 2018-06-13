@@ -81,7 +81,8 @@
                 </div>
             </nav>
             <!-- End Navbar -->
-            <div class="content">
+
+            <div class="content" style="margin-top: 40px">
                 <div class="container-fluid">
                     <div class="row">
                         <div class="col-md-9">
@@ -94,62 +95,63 @@
                                 </div>
                                 <div class="card-body">
 
-                                        <div class="row">
-                                            <div class="col-md-6">
-                                                <div class="form-group">
-                                                    <label class="bmd-label-floating">Order Id</label>
-                                                    <select class="form-control" id="orderId">
-                                                        <option value="testId1" selected>Nugegoda Restaurant</option>
-                                                        <option value="testId2">Mount Lavinia Restaurant</option>
-                                                        <option value="testId3">Moratuwa Restaurant</option>
-                                                    </select>
-                                                </div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label class="bmd-label-floating">Order Id</label>
+                                                <select class="form-control" id="orderId">
+                                                    <option value="testId1" selected>Nugegoda Restaurant</option>
+                                                    <option value="testId2">Mount Lavinia Restaurant</option>
+                                                    <option value="testId3">Moratuwa Restaurant</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label class="bmd-label-floating" style="position: unset;">Restaurant Address</label>
+                                                <input type="text" class="form-control" id="foodStoreLatitudeAndLongitude" style="background-color: white;" readonly>
                                             </div>
                                         </div>
 
-                                        <div class="row">
-                                            <div class="col-md-6">
-                                                <div class="form-group">
-                                                    <label class="bmd-label-floating" style="position: unset;">Restaurant Address</label>
-                                                    <input type="text" class="form-control" id="foodStoreLatitudeAndLongitude" style="background-color: white;" readonly>
-                                                </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label class="bmd-label-floating" style="position: unset;">Distance (Mi.)</label>
+                                                <input type="text" class="form-control" id="distance" style="background-color: white;" readonly>
                                             </div>
+                                        </div>
 
-                                            <div class="col-md-3">
-                                                <div class="form-group">
-                                                    <label class="bmd-label-floating" style="position: unset;">Distance (Mi.)</label>
-                                                    <input type="text" class="form-control" id="distance" style="background-color: white;" readonly>
-                                                </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label class="bmd-label-floating" style="position: unset;">Base Price (Rs.)</label>
+                                                <input type="text" class="form-control" id="basePrice" style="background-color: white;" readonly>
                                             </div>
+                                        </div>
 
-                                            <div class="col-md-3">
-                                                <div class="form-group">
-                                                    <label class="bmd-label-floating" style="position: unset;">Base Price (Rs.)</label>
-                                                    <input type="text" class="form-control" id="basePrice" style="background-color: white;" readonly>
-                                                </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label class="bmd-label-floating" style="position: unset;">User Address</label>
+                                                <input type="text" class="form-control" id="UserAddressLatitudeAndLongitude" style="background-color: white;" readonly>
                                             </div>
+                                        </div>
+
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label class="bmd-label-floating" style="position: unset;">Duration</label>
+                                                <input type="text" class="form-control" id="duration" style="background-color: white;" readonly>
+                                            </div>
+                                        </div>
 
                                         </div>
 
-                                        <div class="row">
-                                            <div class="col-md-6">
-                                                <div class="form-group">
-                                                    <label class="bmd-label-floating" style="position: unset;">User Address</label>
-                                                    <input type="text" class="form-control" id="UserAddressLatitudeAndLongitude" style="background-color: white;" readonly>
-                                                </div>
-                                            </div>
-
-                                            <div class="col-md-3">
-                                                <div class="form-group">
-                                                    <label class="bmd-label-floating" style="position: unset;">Duration</label>
-                                                    <input type="text" class="form-control" id="duration" style="background-color: white;" readonly>
-                                                </div>
-                                            </div>
-
-                                        </div>
-
-                                        <button onclick="functions.orderSubmit()" class="btn btn-primary pull-right">Order Food</button>
-                                        <div class="clearfix"></div>
+                                    <button onclick="functions.orderSubmit()" class="btn btn-primary pull-right">Order Food</button>
+                                    <button onclick="functions.showDrivers()" class="btn btn-primary pull-right">Check Available Drivers</button>
+                                    <div class="clearfix"></div>
 
                                 </div>
                             </div>

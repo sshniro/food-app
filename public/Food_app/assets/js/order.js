@@ -43,48 +43,48 @@ let functions = {
 
         map = new google.maps.Map(mapDiv, {
             center: new google.maps.LatLng(6.84, 79.89),
-            zoom: 12,
+            zoom: 11,
             mapTypeId: google.maps.MapTypeId.ROADMAP
         });
         
     }, clearMarkers: function(){
+        map.setZoom(11)
         if (markersArray) {
             for (let i in markersArray) {
                 markersArray[i].setMap(null);
             }
             markersArray.length = 0;
         }
-    }, getUserCurrentAddress: function(){
-
-        let infoWindow = new google.maps.InfoWindow({map: map});
+    }, getUserCurrentAddress: function(latitude, longitude){
 
         if (navigator.geolocation) {
 
             navigator.geolocation.getCurrentPosition(function(position) {
-
+                /*
                 let pos = {
                     lat: position.coords.latitude,
                     lng: position.coords.longitude
                 };
-
-                map.setCenter(pos);
-
-                functions.calculateDistance($('#foodStoreLatitudeAndLongitude').attr('dataFoodStoreLatitudeAndLongitude'), pos.lat + ',' + pos.lng);
-                functions.addMarker('User', pos.lat, pos.lng);
+                */
+                setMarker();
 
             }, function() {
-                handleLocationError(true, infoWindow, map.getCenter());
+                setMarker();
             });
         } else {
-            // Browser doesn't support Geo location
-            handleLocationError(false, infoWindow, map.getCenter());
+            setMarker();
         }
 
-        function handleLocationError(browserHasGeolocation, infoWindow, pos) {
-            infoWindow.setPosition(pos);
-            infoWindow.setContent(browserHasGeolocation ?
-                'Error: The Geolocation service failed.' :
-                'Error: Your browser doesn\'t support geolocation.');
+        function setMarker() {
+            let pos = {
+                lat: latitude,
+                lng: longitude
+            };
+
+            map.setCenter(new google.maps.LatLng(pos.lat, pos.lng));
+
+            functions.calculateDistance($('#foodStoreLatitudeAndLongitude').attr('dataFoodStoreLatitudeAndLongitude'), pos.lat + ',' + pos.lng);
+            functions.addMarker('User', pos.lat, pos.lng);
         }
 
     }, addMarker: function(type, latitude, longitude){
@@ -150,9 +150,10 @@ let functions = {
 
             functions.setInputValuse(response);
             let originSplit = response.origin.split(',');
+            let destinationSplit = response.destination.split(',');
 
             functions.addMarker('Restaurant', originSplit[0], originSplit[1]);
-            functions.getUserCurrentAddress();
+            functions.getUserCurrentAddress(destinationSplit[0], destinationSplit[1]);
 
         });
 
@@ -182,7 +183,29 @@ let functions = {
         let settings = {
             'async': true,
             'crossDomain': true,
-            'url': window.location.origin + '/drivers?orderId=' + orderJson.orderId + '&origin=' + orderJson.foodStoreLatitudeAndLongitude + '&destination=' + orderJson.UserAddressLatitudeAndLongitude,
+            'url': window.location.origin + '/drivers/available?orderId=' + orderJson.orderId + '&origin=' + orderJson.foodStoreLatitudeAndLongitude + '&destination=' + orderJson.UserAddressLatitudeAndLongitude,
+            'method': 'POST',
+            'headers': {
+                'cache-control': 'no-cache'
+            }
+        };
+
+        $.ajax(settings).done(function (response) {
+            // console.log(response);
+            console.log('Successfully ordered');
+        });
+
+    }, showDrivers: function () {
+        let orderJson = {
+            orderId: $('#orderId').val(),
+            foodStoreLatitudeAndLongitude: $('#foodStoreLatitudeAndLongitude').attr('dataFoodStoreLatitudeAndLongitude'),
+            UserAddressLatitudeAndLongitude: $('#UserAddressLatitudeAndLongitude').attr('dataUserAddressLatitudeAndLongitude')
+        };
+
+        let settings = {
+            'async': true,
+            'crossDomain': true,
+            'url': window.location.origin + '/drivers/available?orderId=' + orderJson.orderId + '&origin=' + orderJson.foodStoreLatitudeAndLongitude + '&destination=' + orderJson.UserAddressLatitudeAndLongitude,
             'method': 'GET',
             'headers': {
                 'cache-control': 'no-cache'
@@ -190,9 +213,26 @@ let functions = {
         };
 
         $.ajax(settings).done(function (response) {
-            console.log(response);
-        });
 
+            let i, j;
+
+            for(i = 0; i < response.data.length; i +=1){
+
+                for(j = 0; j < response.data[i].length; j +=1){
+                    console.log()
+
+                    let markerobject = new google.maps.Marker({
+                        map: map,
+                        draggable: false,
+                        icon: window.location.origin + '/Food_app/assets/img/car.png',
+                        position: new google.maps.LatLng(response.data[i][j].latitude, response.data[i][j].longitude)
+                    });
+
+                    markersArray.push(markerobject);
+                }
+            }
+
+        });
     }
 
 };

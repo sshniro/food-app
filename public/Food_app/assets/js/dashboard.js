@@ -33,6 +33,7 @@ let functions = {
                 $('#orderIdSelect').change(function() {
                     functions.onStartInit($('#orderIdSelect').val());
 
+                    map.setZoom(11)
                     if (markersArray) {
                         for (i in markersArray) {
                             markersArray[i].setMap(null);
@@ -83,6 +84,7 @@ let functions = {
             let destinationSplit = response.destination.split(',');
             functions.addMarker(originSplit[0], originSplit[1]);
             functions.addMarker(destinationSplit[0], destinationSplit[1]);
+            map.setCenter(new google.maps.LatLng(destinationSplit[0], destinationSplit[1]));
 
             functions.populateTableRow(response);
 
@@ -175,7 +177,7 @@ let functions = {
          let mapDiv = document.getElementById('map-canvas');
          map = new google.maps.Map(mapDiv, {
             center: new google.maps.LatLng(6.84, 79.89),
-            zoom: 12,
+            zoom: 11,
             mapTypeId: google.maps.MapTypeId.ROADMAP
          });
 

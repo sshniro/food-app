@@ -3,16 +3,20 @@ const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
+const pg = require('pg');
 
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 const driversRouter = require('./routes/drivers');
 const ordersRouter = require('./routes/orders');
 const googleMapsRouter = require('./routes/google-maps');
-
+const baseConfig = require('./config/baseConfig.js');
 const geo_helper = require('./geo-helper.js');
 
-var app = express();
+const connectionString = process.env.DATABASE_URL || baseConfig.dataaseURL;
+const client = new pg.Client(connectionString);
+
+let app = express();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -63,6 +67,50 @@ if (module === require.main) {
     const server = app.listen(PORT, () => {
         console.log(`App listening on port ${PORT}`);
     });
+}
+
+initDatabase();
+
+function initDatabase(){
+
+    const dropItemsTableSQLQuery = 'DROP TABLE drivers';
+    const createItemsTableSQLQuery = 'CREATE TABLE drivers(\n' +
+        '    ID serial NOT NULL PRIMARY KEY,\n' +
+        '    username VARCHAR(20) UNIQUE, \n' +
+        '    password VARCHAR(256) not null,\n' +
+        '    location_address VARCHAR(255),\n' +
+        '    location_latitude DOUBLE PRECISION,\n' +
+        '    location_longitude DOUBLE PRECISION,\n' +
+        '    driver_availability VARCHAR(20))';
+
+    // dropTable(dropItemsTableSQLQuery, createItemsTableSQLQuery);
+}
+
+function dropTable(dropQuery, createQuery){
+
+    client.connect();
+    const queryDropTable = client.query(dropQuery);
+
+    queryDropTable.then(function (queryDropTableResponse) {
+        createTable(createQuery);
+    }).catch(function (err) {
+        createTable(createQuery);
+    });
+
+}
+
+function createTable(createQuery){
+
+    const queryCreateTable = client.query(createQuery);
+
+    queryCreateTable.then(function (queryCreateTableResponse) {
+        console.log('Successfully created table');
+        client.end();
+    }).catch(function (err) {
+        console.log(err);
+        client.end();
+    });
+
 }
 
 module.exports = app;
