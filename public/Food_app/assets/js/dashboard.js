@@ -114,7 +114,7 @@ let functions = {
                         '    <td>' + (i + 1) + '</td>\n' +
                         '    <td>' + populatingData.notifiedDrivers[i].key + '</td>\n' +
                         '    <td>' + populatingData.notifiedDrivers[i].distance + '</td>\n' +
-                        '    <td>$56.00</td>\n' +
+                        '    <td>' + populatingData.notifiedDrivers[i].rating + '</td>\n' +
                         '    <td class="text-primary">Fair Accepted</td>\n' +
                         '</tr>');
                 }else {
@@ -123,7 +123,7 @@ let functions = {
                         '    <td>' + (i + 1) + '</td>\n' +
                         '    <td>' + populatingData.notifiedDrivers[i].key + '</td>\n' +
                         '    <td>' + populatingData.notifiedDrivers[i].distance + '</td>\n' +
-                        '    <td>$56.00</td>\n' +
+                        '    <td>' + populatingData.notifiedDrivers[i].rating + '</td>\n' +
                         '    <td class="text-primary">Not Responded</td>\n' +
                         '</tr>');
                 }
