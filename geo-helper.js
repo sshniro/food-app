@@ -20,6 +20,20 @@ const locationSet = {
     'driver14-cotta-rd': {latitude: 6.902645, longitude: 79.862495, rating: 4.1}
 };
 
+let destinationJsonSet = [{
+    orderId : 'testId1',
+    origin: '6.863543,79.904504',
+    destination: '6.839555, 79.892316'
+}, {
+    orderId : 'testId2',
+    origin: '6.831878,79.883132',
+    destination: '6.832134, 79.894419'
+}, {
+    orderId : 'testId3',
+    origin: '6.809319889107459,79.88748945236205',
+    destination: '6.911700782159839,79.8564837623046'
+} ];
+
 client.on("error", function (err) {
     console.log("Error " + err);
 });
@@ -89,27 +103,66 @@ function getNearByVehicles(lat, long) {
 }
 
 
-function initDriverLatLongData() {
-
+function addLocationsToRedis(locations) {
     return new Promise(function (resolve, reject) {
-        geo.addLocations(locationSet, function (err, reply) {
+        geo.addLocations(locations, function (err, reply) {
             if (err) {
                 console.error(err);
                 reject();
             }
             else console.log('added locations:', reply);
             resolve({'dataInserted': reply});
-});
-})
+        });
+    });
 }
 
-// persistInRedis("test", "value form niro");
-// getFromRedis("test");
+function addLocationToRedis(location) {
+    return new Promise(function (resolve, reject) {
+        geo.addLocation(location.key, location.body, function (err, reply) {
+            if (err) {
+                console.error(err);
+                reject();
+            }
+            else console.log('added location:', reply);
+            resolve({'dataInserted': reply});
+        });
+    });
+}
+
+function removeLocationsFromRedis(locationsArray) {
+    return new Promise(function (resolve, reject) {
+        geo.removeLocations(locationsArray, function (err, reply) {
+            if (err) {
+                console.error(err);
+                reject();
+            }
+            else console.log('removed locations:', reply);
+            resolve({'dataRemoved': reply});
+        });
+    });
+}
+
+function removeLocationFromRedis(location) {
+    return new Promise(function (resolve, reject) {
+        geo.removeLocation(location, function (err, reply) {
+            if (err) {
+                console.error(err);
+                reject();
+            }
+            else console.log('removed location:', reply);
+            resolve({'dataRemoved': reply});
+        });
+    });
+}
 
 module.exports = {
-    initDriverLatLongData: initDriverLatLongData,
+    addLocationsToRedis: addLocationsToRedis,
+    addLocationToRedis: addLocationToRedis,
+    removeLocationsFromRedis: removeLocationsFromRedis,
+    removeLocationFromRedis: removeLocationFromRedis,
     getNearByVehicles: getNearByVehicles,
     persistInRedis: persistInRedis,
     getFromRedis: getFromRedis,
-    locationSet: locationSet
+    locationSet: locationSet,
+    destinationJsonSet: destinationJsonSet
 };

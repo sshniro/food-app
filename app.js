@@ -12,6 +12,7 @@ const ordersRouter = require('./routes/orders');
 const googleMapsRouter = require('./routes/google-maps');
 const baseConfig = require('./config/baseConfig.js');
 const geo_helper = require('./geo-helper.js');
+const driverUtilHelper = require('./driverUtilHelper.js');
 
 const connectionString = process.env.DATABASE_URL || baseConfig.dataaseURL;
 const client = new pg.Client(connectionString);
@@ -51,7 +52,20 @@ app.use(function(err, req, res, next) {
 });
 
 
-geo_helper.initDriverLatLongData().then(e => console.log('Successfully initialized drivers.'));
+// geo_helper.addLocationsToRedis(geo_helper.locationSet).then(e => console.log('Successfully initialized drivers.'));
+geo_helper.addLocationsToRedis(geo_helper.locationSet).then(function (res) {
+    console.log('Successfully initialized drivers.')
+
+    for(let i = 0; i < geo_helper.destinationJsonSet.length; i += 1){
+        driverUtilHelper.findAvailableDrivers(geo_helper.destinationJsonSet[i], true).then(function (response) {
+            console.log(response);
+        }).catch(function (err) {
+            console.log(err);
+        });
+    }
+});
+
+
 
 console.log('UI: http://localhost:3000/food_app/index.html')
 console.log('Google Maps API: GET http://localhost:3000/maps/distancematrix/')
@@ -81,7 +95,8 @@ function initDatabase(){
         '    location_address VARCHAR(255),\n' +
         '    location_latitude DOUBLE PRECISION,\n' +
         '    location_longitude DOUBLE PRECISION,\n' +
-        '    driver_availability VARCHAR(20))';
+        '    driver_availability VARCHAR(20),\n' +
+        '    driver_rating real)';
 
     // dropTable(dropItemsTableSQLQuery, createItemsTableSQLQuery);
 }

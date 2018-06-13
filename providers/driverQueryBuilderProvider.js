@@ -3,6 +3,7 @@
 const sha256 = require('sha256')
 
 const driverService = require('../services/driverService.js');
+const geo_helper = require('../geo-helper.js');
 
 module.exports = {
     getDrivers: getDrivers,
@@ -36,7 +37,7 @@ function insertDriver(driverInfo){
 
     return new Promise(function (resolve, reject) {
 
-        let queryPrefix = 'INSERT INTO drivers(', queryPostfix = ') values(';
+        let queryPrefix = 'INSERT INTO drivers(', queryPostfix = ') values(', addToRedis = false;
 
         if(driverInfo.username && driverInfo.password){
             queryPrefix = queryPrefix.concat('username, password');
@@ -47,8 +48,12 @@ function insertDriver(driverInfo){
         }
 
         if(driverInfo.location_address && driverInfo.location_latitude && driverInfo.location_longitude){
+            addToRedis = true;
             queryPrefix = queryPrefix.concat(', location_address, location_latitude, location_longitude');
             queryPostfix = queryPostfix.concat(', \'' + driverInfo.location_address + '\', ' + driverInfo.location_latitude + ', ' + driverInfo.location_longitude);
+        }else {
+            console.log('Location information missing');
+            return reject({success: false, message: 'Location information missing'});
         }
 
         if(driverInfo.driver_availability){
@@ -56,10 +61,27 @@ function insertDriver(driverInfo){
             queryPostfix = queryPostfix.concat(', \'' + driverInfo.driver_availability + '\'');
         }
 
+        if(driverInfo.driver_rating){
+            queryPrefix = queryPrefix.concat(', driver_rating');
+            queryPostfix = queryPostfix.concat(', \'' + driverInfo.driver_rating + '\'');
+        }
+
         queryPostfix = queryPostfix.concat(');');
 
 
         driverService.queryExecutor(queryPrefix + queryPostfix).then(function (queryResponse) {
+
+            if(addToRedis){
+                let redisJson = {
+                    key: driverInfo.username,
+                    body: {
+                        latitude: driverInfo.location_latitude,
+                        longitude: driverInfo.location_longitude
+                    }
+                };
+                geo_helper.addLocationToRedis(redisJson).then(e => console.log('Successfully added driver to redis.'));
+            }
+
             return resolve({success: true, data: queryResponse});
         }).catch(function (err) {
             console.log(err);
@@ -90,13 +112,32 @@ function updateDriver(driverInfo){
                     queryPrefix = queryPrefix.concat(', driver_availability = \'' + driverInfo.driver_availability + '\'');
                 }
 
-            }else{
-                queryPrefix = queryPrefix.concat('driver_availability = \'' + driverInfo.driver_availability + '\'');
+                if(driverInfo.driver_rating){
+                    queryPrefix = queryPrefix.concat(', driver_rating = ' + driverInfo.driver_rating);
+                }
+
+            }else {
+
+                let temp = response.data[0];
+                for(let key in driverInfo) temp[key] = driverInfo[key];
+
+                queryPrefix = queryPrefix.concat('driver_availability = \'' + response.data[0].driver_availability + '\'');
+                queryPrefix = queryPrefix.concat(', driver_rating = ' + response.data[0].driver_rating);
             }
 
             queryPrefix = queryPrefix.concat(' WHERE ID = ' + response.data[0].id) + ';';
 
             driverService.queryExecutor(queryPrefix).then(function (queryResponse) {
+
+                let redisJson = {
+                    key: driverInfo.username,
+                    body: {
+                        latitude: driverInfo.location_latitude,
+                        longitude: driverInfo.location_longitude
+                    }
+                };
+                geo_helper.addLocationToRedis(redisJson).then(e => console.log('Successfully added driver to redis.'));
+
                 return resolve({success: true, data: queryResponse});
             }).catch(function (err) {
                 console.log(err);

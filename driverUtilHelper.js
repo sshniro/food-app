@@ -4,11 +4,47 @@ const sortJsonArray = require('sort-json-array');
 
 const geo_helper = require('./geo-helper');
 const configs = require('./config/baseConfig');
+const mapsUtilHelper = require('./mapsUtilHelper.js');
 
 module.exports = {
     getDriverGroupedByDistanceAndSortByRating: getDriverGroupedByDistanceAndSortByRating,
-    notifyDrivers: notifyDrivers
+    findAvailableDrivers: findAvailableDrivers
 };
+
+function findAvailableDrivers(destinationJson, notify){
+
+    return new Promise(function (resolve, reject) {
+
+        mapsUtilHelper.calculateDistanceMatrixFromOriginsToDestinations(destinationJson).then(function (mapsUtilHelperResponse) {
+            let result = {}, key;
+            for(key in destinationJson) result[key] = destinationJson[key];
+            for(key in mapsUtilHelperResponse) result[key] = mapsUtilHelperResponse[key];
+
+            getDriverGroupedByDistanceAndSortByRating(result).then(function (driverUtilHelperResponse) {
+                let response = {
+                    success: true,
+                    data: driverUtilHelperResponse.row
+                };
+
+                if(notify){
+                    notifyDrivers(driverUtilHelperResponse.row, driverUtilHelperResponse.destinationJson);
+                    resolve({status : 'Successfully notified the drivers.'});
+                }else {
+                    resolve(response);
+                }
+
+            }).catch(function (err) {
+                console.log(err);
+                reject(err);
+            });
+
+        }).catch(function (err) {
+            console.log(err);
+            reject(err);
+        });
+
+    });
+}
 
 function getDriverGroupedByDistanceAndSortByRating(destinationJson) {
 
@@ -56,8 +92,6 @@ function getDriverGroupedByDistanceAndSortByRating(destinationJson) {
     });
 
 }
-
-
 
 function notifyDrivers(sortedDriversByDistance, destinationJson) {
 

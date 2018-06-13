@@ -6,8 +6,6 @@ const router = express.Router();
 const authenticationProvider = require('../providers/authenticationProvider.js');
 const driverQueryBuilderProvider = require('../providers/driverQueryBuilderProvider.js');
 const driverUtilHelper = require('../driverUtilHelper.js');
-const mapsUtilHelper = require('../mapsUtilHelper.js');
-
 
 /* POST Authenticate driver */
 router.post('/Authentication', function(req, res, next) {
@@ -83,6 +81,11 @@ router.put('/', function(req, res, next){
 
 });
 
+/* ***************************              Need to implement available drivers With SQL DB                 *************************** */
+
+
+/* ***************************              Old With JSON               *************************** */
+
 /* GET List all available drivers from origin (Restaurant) */
 router.get('/available', function(req, res, next) {
 
@@ -92,26 +95,10 @@ router.get('/available', function(req, res, next) {
         destination: req.query.destination || '6.794126,79.908880'
     };
 
-    mapsUtilHelper.calculateDistanceMatrixFromOriginsToDestinations(destinationJson).then(function (mapsUtilHelperResponse) {
-        let result = {}, key;
-        for(key in destinationJson) result[key] = destinationJson[key];
-        for(key in mapsUtilHelperResponse) result[key] = mapsUtilHelperResponse[key];
-
-        driverUtilHelper.getDriverGroupedByDistanceAndSortByRating(result).then(function (driverUtilHelperResponse) {
-            let response = {
-                success: true,
-                data: driverUtilHelperResponse.row
-            };
-            // for(let key in driverUtilHelperResponse.destinationJson) response[key] = driverUtilHelperResponse.destinationJson[key];
-
-            res.status(200).json(response);
-        }).catch(function (err) {
-            console.log(err);
-            res.status(500).send(err);
-        });
-
+    driverUtilHelper.findAvailableDrivers(destinationJson, false).then(function (response) {
+        return res.status(200).json(response);
     }).catch(function (err) {
-        res.status(500).send(err);
+        return res.status(500).json(err);
     });
 
 });
@@ -125,23 +112,10 @@ router.post('/available', function(req, res, next) {
         destination: req.query.destination || '6.794126,79.908880'
     };
 
-    mapsUtilHelper.calculateDistanceMatrixFromOriginsToDestinations(destinationJson).then(function (mapsUtilHelperResponse) {
-        let result = {}, key;
-        for(key in destinationJson) result[key] = destinationJson[key];
-        for(key in mapsUtilHelperResponse) result[key] = mapsUtilHelperResponse[key];
-
-        driverUtilHelper.getDriverGroupedByDistanceAndSortByRating(result).then(function (driverUtilHelperResponse) {
-
-            driverUtilHelper.notifyDrivers(driverUtilHelperResponse.row, driverUtilHelperResponse.destinationJson);
-
-            res.status(200).json({status : 'Successfully notified the drivers.'});
-        }).catch(function (err) {
-            console.log(err);
-            res.status(500).send(err);
-        });
-
+    driverUtilHelper.findAvailableDrivers(destinationJson, true).then(function (response) {
+        return res.status(200).json(response);
     }).catch(function (err) {
-        res.status(500).send(err);
+        return res.status(500).json(err);
     });
 
 });
