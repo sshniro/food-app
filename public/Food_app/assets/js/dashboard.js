@@ -44,7 +44,7 @@ let functions = {
 
                 setInterval(function(){
                     functions.onStartInit($('#orderIdSelect').val());
-                }, 6 * 1000);
+                }, 5 * 1000);
             });
         });
 
