@@ -23,11 +23,11 @@ const locationSet = {
 let destinationJsonSet = [{
     orderId : 'testId1',
     origin: '6.863543,79.904504',
-    destination: '6.839555, 79.892316'
+    destination: '6.839555,79.892316'
 }, {
     orderId : 'testId2',
     origin: '6.831878,79.883132',
-    destination: '6.832134, 79.894419'
+    destination: '6.832134,79.894419'
 }, {
     orderId : 'testId3',
     origin: '6.809319889107459,79.88748945236205',

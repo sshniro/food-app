@@ -44,7 +44,7 @@ let functions = {
 
                 setInterval(function(){
                     functions.onStartInit($('#orderIdSelect').val());
-                }, 5000);
+                }, 6 * 1000);
             });
         });
 
@@ -82,11 +82,36 @@ let functions = {
 
             let originSplit = response.origin.split(',');
             let destinationSplit = response.destination.split(',');
+
+            functions.populateTableRow(response);
+
             functions.addMarker(originSplit[0], originSplit[1]);
             functions.addMarker(destinationSplit[0], destinationSplit[1]);
             map.setCenter(new google.maps.LatLng(destinationSplit[0], destinationSplit[1]));
 
-            functions.populateTableRow(response);
+/*
+*
+*              Route Display from origin to destination
+*
+*
+            let request = {
+                origin: new google.maps.LatLng(originSplit[0], originSplit[1]),
+                destination: new google.maps.LatLng(destinationSplit[0], destinationSplit[1]),
+                travelMode: google.maps.TravelMode.DRIVING
+            };
+
+            directionsService.route(request, function (response, status) {
+                if (status === google.maps.DirectionsStatus.OK) {
+
+                    if(!directionsDisplay.directions || (directionsDisplay.directions.request.origin.location.lat() !== response.request.origin.location.lat() && directionsDisplay.directions.request.origin.location.lng() !== response.request.origin.location.lng() && directionsDisplay.directions.request.destination.location.lat() !== response.request.destination.location.lat() && directionsDisplay.directions.request.destination.location.lng() !== response.request.destination.location.lng())){
+
+                        directionsDisplay.setDirections(response);
+                    }
+                } else {
+                    console.log('Failed to get the direction');
+                }
+            });
+            */
 
         });
     }, populateTableRow: function(populatingData) {
@@ -176,13 +201,18 @@ let functions = {
     }, mapInit : function initialize() {
          let mapDiv = document.getElementById('map-canvas');
          map = new google.maps.Map(mapDiv, {
-            center: new google.maps.LatLng(6.84, 79.89),
-            zoom: 11,
-            mapTypeId: google.maps.MapTypeId.ROADMAP
+             center: new google.maps.LatLng(6.84, 79.89),
+             zoom: 11,
+             mapTypeId: google.maps.MapTypeId.ROADMAP,
+             gestureHandling: 'cooperative'
          });
+
+        directionsService = new google.maps.DirectionsService();
+        directionsDisplay = new google.maps.DirectionsRenderer();
+        directionsDisplay.setMap(map);
 
     }
 
 };
 
-let map, markersArray = [];
+let map, markersArray = [], directionsService, directionsDisplay;

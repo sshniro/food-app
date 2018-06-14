@@ -10,11 +10,10 @@ const driverUtilHelper = require('../driverUtilHelper.js');
 /* POST Authenticate driver */
 router.post('/Authentication', function(req, res, next) {
 
-    let auth = req.headers['authorization'];
+    let auth = req.body || {};
 
-    if(!auth){
-        res.setHeader('WWW-Authenticate', 'Basic realm="Secure Area"');
-        return res.status(401).json({success: false, message: 'Need authorization to continue'});
+    if(!auth.username || !auth.password){
+        return res.status(401).json({success: false, message: 'Username or password missing'});
     }else{
 
         authenticationProvider.authenticateDriver(auth).then(function (response) {
@@ -56,18 +55,17 @@ router.post('/', function(req, res, next){
 /* PUT Update driver by username */
 router.put('/', function(req, res, next){
 
-    let auth = req.headers['authorization'];
+    let token = req.headers['x-access-token'];
     let driverInfo = req.body || {};
 
-    if(!auth){
-        res.setHeader('WWW-Authenticate', 'Basic realm="Secure Area"');
+    if(!token){
+        res.setHeader('WWW-Authenticate', 'x-access-token="Secure Area"');
         return res.status(401).json({success: false, message: 'Need authorization to continue'});
     }else{
 
-        authenticationProvider.authenticateDriver(auth).then(function (response) {
+        authenticationProvider.authorizeDriver(token).then(function (response) {
 
-            driverInfo.auth = auth;
-            driverQueryBuilderProvider.updateDriver(driverInfo).then(function (response) {
+            driverQueryBuilderProvider.updateDriver(response.data.username, driverInfo).then(function (response) {
                 return res.status(200).json(response);
             }).catch(function (err) {
                 return res.status(500).json(err);

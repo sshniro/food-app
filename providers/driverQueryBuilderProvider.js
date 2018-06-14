@@ -1,9 +1,9 @@
 'use strict';
 
-const sha256 = require('sha256')
-
 const driverService = require('../services/driverService.js');
 const geo_helper = require('../geo-helper.js');
+const bcrypt = require('bcryptjs');
+const baseConfig = require('../config/baseConfig.js');
 
 module.exports = {
     getDrivers: getDrivers,
@@ -37,11 +37,11 @@ function insertDriver(driverInfo){
 
     return new Promise(function (resolve, reject) {
 
-        let queryPrefix = 'INSERT INTO drivers(', queryPostfix = ') values(', addToRedis = false;
+        let queryPrefix = 'INSERT INTO drivers(', queryPostfix = ') values(', addToRedis = false, salt = bcrypt.genSaltSync(baseConfig.saltRounds);;
 
         if(driverInfo.username && driverInfo.password){
             queryPrefix = queryPrefix.concat('username, password');
-            queryPostfix = queryPostfix.concat('\'' + driverInfo.username + '\', \'' + sha256(driverInfo.password) + '\'');
+            queryPostfix = queryPostfix.concat('\'' + driverInfo.username + '\', \'' + bcrypt.hashSync(driverInfo.password, salt) + '\'');
         } else{
             console.log('Username or password missing');
             return reject({success: false, message: 'Username or password missing'});
@@ -92,16 +92,11 @@ function insertDriver(driverInfo){
 }
 
 
-function updateDriver(driverInfo){
+function updateDriver(username, driverInfo){
 
     return new Promise(function (resolve, reject) {
 
-        let tmp = driverInfo.auth.split(' ');
-        let buf = new Buffer(tmp[1], 'base64');
-        let plain_auth = buf.toString();
-        let creds = plain_auth.split(':');
-
-        getDrivers(creds[0]).then(function (response) {
+        getDrivers(username).then(function (response) {
 
             let queryPrefix = 'UPDATE drivers SET ';
 
@@ -136,7 +131,7 @@ function updateDriver(driverInfo){
                         longitude: driverInfo.location_longitude
                     }
                 };
-                geo_helper.addLocationToRedis(redisJson).then(e => console.log('Successfully added driver to redis.'));
+                geo_helper.addLocationToRedis(redisJson).then(e => console.log('Successfully Updated driver to redis.'));
 
                 return resolve({success: true, data: queryResponse});
             }).catch(function (err) {
