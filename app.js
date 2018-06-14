@@ -67,14 +67,14 @@ app.use(function(err, req, res, next) {
 
 
 
-console.log('UI: http://localhost:3000/food_app/index.html')
-console.log('Google Maps API: GET http://localhost:3000/maps/distancematrix/')
-console.log('Driver API: GET http://localhost:3000/drivers?orderId=testId2')
-console.log('Order API: GET http://localhost:3000/orders?orderId=testId2')
-console.log('Order API: POST http://localhost:3000/orders, JSON: { "orderId": "testId2", "driverId": "driver09-bekariya-junction" }')
-console.log('Google API Key: GET http://localhost:3000/apiKey')
+console.log('UI: http://localhost:8080/food_app/index.html')
+console.log('Google Maps API: GET http://localhost:8080/maps/distancematrix/')
+console.log('Driver API: GET http://localhost:8080/drivers?orderId=testId2')
+console.log('Order API: GET http://localhost:8080/orders?orderId=testId2')
+console.log('Order API: POST http://localhost:8080/orders, JSON: { "orderId": "testId2", "driverId": "driver09-bekariya-junction" }')
+console.log('Google API Key: GET http://localhost:8080/apiKey')
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
 
 if (module === require.main) {
     // Start the server
