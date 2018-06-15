@@ -30,21 +30,13 @@ router.post('/Authentication', function(req, res, next) {
 /* GET Get all drivers || Get driver by username */
 router.get('/', function(req, res, next){
 
-    let token = req.headers['x-access-token'];
     let driverId = req.query.driverId || '';
 
-    if(!token){
-        res.setHeader('WWW-Authenticate', 'x-access-token="Secure Area"');
-        return res.status(401).json({success: false, message: 'Need authorization to continue'});
-    }else{
-
-        driverQueryBuilderProvider.getDrivers(driverId).then(function (response) {
-            return res.status(200).json(response);
-        }).catch(function (err) {
-            return res.status(500).json(err);
-        });
-
-    }
+    driverQueryBuilderProvider.getDrivers(driverId).then(function (response) {
+        return res.status(200).json(response);
+    }).catch(function (err) {
+        return res.status(500).json(err);
+    });
 
 });
 
@@ -79,29 +71,15 @@ router.post('/batch', function(req, res, next){
 });
 
 /* PUT Update driver by username */
-router.put('/', function(req, res, next){
+router.put('/', authenticationProvider.permit('driver'), function(req, res, next){
 
-    let token = req.headers['x-access-token'];
     let driverInfo = req.body || {};
 
-    if(!token){
-        res.setHeader('WWW-Authenticate', 'x-access-token="Secure Area"');
-        return res.status(401).json({success: false, message: 'Need authorization to continue'});
-    }else{
-
-        authenticationProvider.authorizeDriver(token).then(function (response) {
-
-            driverQueryBuilderProvider.updateDriver(response.data.username, driverInfo).then(function (response) {
-                return res.status(200).json(response);
-            }).catch(function (err) {
-                return res.status(500).json(err);
-            });
-
-        }).catch(function (err) {
-            return res.status(401).json(err);
-        });
-
-    }
+    driverQueryBuilderProvider.updateDriver(req.user.username, driverInfo).then(function (response) {
+        return res.status(200).json(response);
+    }).catch(function (err) {
+        return res.status(500).json(err);
+    });
 
 });
 

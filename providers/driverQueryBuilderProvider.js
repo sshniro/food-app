@@ -109,7 +109,6 @@ function insertDriver(driverInfo){
             if(queryResponse.rowCount > 0) return resolve({success: true, data: queryResponse.rows[0]});
             else return reject({success: false, message: 'Failed to insert driver'});
 
-
         }).catch(function (err) {
             console.log(err);
             return reject({success: false, message: err});
@@ -147,20 +146,23 @@ function updateDriver(username, driverInfo){
                 queryPrefix = queryPrefix.concat(', driver_rating = ' + response.data[0].driver_rating);
             }
 
-            queryPrefix = queryPrefix.concat(' WHERE ID = ' + response.data[0].id) + ';';
+            queryPrefix = queryPrefix.concat(' WHERE ID = ' + response.data[0].id) + ' RETURNING id, username;';
 
             postgreSQLService.queryExecutor(queryPrefix).then(function (queryResponse) {
 
-                let redisJson = {
-                    key: driverInfo.username,
-                    body: {
-                        latitude: driverInfo.location_latitude,
-                        longitude: driverInfo.location_longitude
-                    }
-                };
-                geo_helper.addLocationToRedis(redisJson).then(e => console.log('Successfully Updated driver to redis.'));
+                if(queryResponse.rowCount > 0) {
+                    let redisJson = {
+                        key: driverInfo.username,
+                        body: {
+                            latitude: driverInfo.location_latitude,
+                            longitude: driverInfo.location_longitude
+                        }
+                    };
+                    geo_helper.addLocationToRedis(redisJson).then(e => console.log('Successfully Updated driver to redis.'));
 
-                return resolve({success: true, data: queryResponse});
+                    return resolve({success: true, data: queryResponse.rows[0]});
+                } else return reject({success: false, message: 'Failed to update driver'});
+
             }).catch(function (err) {
                 console.log(err);
                 return reject({success: false, message: err});

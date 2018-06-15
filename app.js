@@ -1,5 +1,6 @@
 const createError = require('http-errors');
 const express = require('express');
+const router = express.Router();
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
@@ -14,6 +15,7 @@ const googleMapsRouter = require('./routes/google-maps');
 const baseConfig = require('./config/baseConfig.js');
 const geo_helper = require('./geo-helper.js');
 const driverUtilHelper = require('./driverUtilHelper.js');
+const authenticationProvider = require('./providers/authenticationProvider.js');
 
 const connectionString = process.env.DATABASE_URL || baseConfig.dataaseURL;
 const client = new pg.Client(connectionString);
@@ -29,6 +31,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+app.use(authenticationProvider.authorizeDriverV2);
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
@@ -68,7 +72,6 @@ geo_helper.addLocationsToRedis(geo_helper.locationSet).then(function (res) {
 });
 
 // initDatabase();
-
 
 console.log('UI: http://localhost:8080/food_app/index.html')
 console.log('Google Maps API: GET http://localhost:8080/maps/distancematrix/')

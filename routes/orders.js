@@ -8,7 +8,7 @@ const orderQueryBuilderProvider = require('../providers/orderQueryBuilderProvide
 const geo_helper = require('../geo-helper.js');
 
 
-/* GET New */
+/* GET All orders */
 router.get('/v2', function(req, res, next){
 
     let orderId = req.query.orderId || '';
@@ -21,6 +21,7 @@ router.get('/v2', function(req, res, next){
 
 });
 
+/* GET Complete orders (Joined) */
 router.get('/complete/v2', function(req, res, next){
 
     let orderId = req.query.orderId;
@@ -37,11 +38,12 @@ router.get('/complete/v2', function(req, res, next){
 
 });
 
-router.post('/accept/v2', function(req, res, next){
+/* GET Accept a order */
+router.post('/accept/v2', authenticationProvider.permit('driver'), function(req, res, next){
 
     let oderJson = {
         orderId: req.body.orderId || 1,
-        driverId: req.body.driverId || 1
+        driverId: req.user.id
     };
 
     orderQueryBuilderProvider.acceptOrder(oderJson).then(function (response) {

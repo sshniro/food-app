@@ -7,7 +7,9 @@ const baseConfig = require('../config/baseConfig.js');
 
 module.exports = {
     authenticateDriver: authenticateDriver,
-    authorizeDriver: authorizeDriver
+    authorizeDriver: authorizeDriver,
+    authorizeDriverV2: authorizeDriverV2,
+    permit: permit
 };
 
 function authenticateDriver(auth){
@@ -17,8 +19,6 @@ function authenticateDriver(auth){
         auth.hashedPassword = bcrypt.hashSync(auth.password, baseConfig.saltRounds);
 
         let query = 'SELECT * FROM drivers WHERE username = \'' + auth.username + '\';';
-
-        // console.log(query);
 
         driverService.queryExecutor(query).then(function (queryResponse) {
 
@@ -52,7 +52,7 @@ function authorizeDriver(token){
         jwt.verify(token, baseConfig.secret, function(err, decoded) {
             if (err) return reject({ authentication: false, message: 'Failed to authenticate token.' });
 
-            let query = 'SELECT ID, username, location_address, location_latitude, location_longitude, driver_availability FROM drivers WHERE username = \'' + decoded.id + '\';';
+            let query = 'SELECT id, username, location_address, location_latitude, location_longitude, driver_availability FROM drivers WHERE username = \'' + decoded.id + '\';';
 
             driverService.queryExecutor(query).then(function (queryResponse) {
 
@@ -70,4 +70,37 @@ function authorizeDriver(token){
         });
 
     });
+}
+
+function authorizeDriverV2(req, res, next){
+
+    let token = req.headers['x-access-token'] || '';
+
+    if(!token){
+        req.user = {role: 'user'};
+        next();
+    }else{
+
+        authorizeDriver(token).then(function (response) {
+            req.user = {role: 'driver', username: response.data.username, id: response.data.id};
+            next();
+        }).catch(function (err) {
+            res.status(401).json(err);
+        });
+
+    }
+
+}
+
+function permit(...allowed) {
+    const isAllowed = role => allowed.indexOf(role) > -1;
+
+    return (req, res, next) => {
+        if (req.user && isAllowed(req.user.role))
+            next();
+        else {
+            res.setHeader('WWW-Authenticate', 'x-access-token="Secure Area"');
+            return res.status(401).json({success: false, message: 'Need authorization to continue'});
+        }
+    }
 }
