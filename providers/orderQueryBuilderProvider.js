@@ -62,6 +62,22 @@ function getCompleteOrder(orderId) {
     });
 }
 
+function getNotifiedDriver(orderId) {
+
+    return new Promise(function (resolve, reject) {
+
+        let query = 'SELECT  users.id, users.username, drivers.location_address, drivers.location_latitude, drivers.location_longitude, drivers.availability, drivers.rating FROM notified_drivers JOIN drivers ON notified_drivers.driverId = drivers.id JOIN users ON drivers.id = users.id WHERE notified_drivers.orderId = \'' + orderId + '\';';
+
+        postgreSQLService.queryExecutor(query).then(function (queryResponse) {
+            if(queryResponse.rowCount > 0) return resolve({success: true, data: queryResponse.rows});
+            else return reject({success: false, message: 'Failed to insert order'});
+        }).catch(function (err) {
+            console.log(err);
+            return reject({success: false, message: err});
+        });
+
+    });
+}
 
 function insertOrder(orderJson) {
 
@@ -105,25 +121,6 @@ function insertNotifiedDriver(orderId, notifiedDriver) {
     });
 }
 
-function getNotifiedDriver(orderId) {
-
-    return new Promise(function (resolve, reject) {
-
-        // let query = 'SELECT * FROM notified_drivers WHERE orderId = ' + orderId + ';';
-
-        let query = 'SELECT * FROM notified_drivers INNER JOIN drivers ON notified_drivers.driverId = drivers.id WHERE notified_drivers.orderId = \'' + orderId + '\';';
-
-        postgreSQLService.queryExecutor(query).then(function (queryResponse) {
-            if(queryResponse.rowCount > 0) return resolve({success: true, data: queryResponse.rows});
-            else return reject({success: false, message: 'Failed to insert order'});
-        }).catch(function (err) {
-            console.log(err);
-            return reject({success: false, message: err});
-        });
-
-    });
-}
-
 function acceptOrder(oderJson) {
 
     return new Promise(function (resolve, reject) {
@@ -135,7 +132,6 @@ function acceptOrder(oderJson) {
             if(queryResponse.data[0].order_status === 'REQUEST_PENDING'){
 
                 postgreSQLService.queryExecutor(query).then(function (queryResponse) {
-                    console.log(queryResponse)
                     if(queryResponse.rowCount > 0) return resolve({success: true, data: queryResponse.rows[0]});
                     else return reject({success: false, message: 'Failed to update order'});
                 }).catch(function (err) {

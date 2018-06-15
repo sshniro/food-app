@@ -19,9 +19,9 @@ function getDrivers(driverId){
         let query;
 
         if(driverId === ''){
-            query = 'SELECT ID, username, location_address, location_latitude, location_longitude, driver_availability, driver_rating FROM drivers ORDER BY id ASC;';
+            query = 'SELECT drivers.id, users.username, drivers.location_address, drivers.location_latitude, drivers.location_longitude, drivers.availability, drivers.rating FROM drivers INNER JOIN users ON drivers.id = users.id ORDER BY drivers.id ASC;';
         }else{
-            query = 'SELECT ID, username, location_address, location_latitude, location_longitude, driver_availability, driver_rating FROM drivers WHERE username = \'' + driverId + '\';';
+            query = 'SELECT drivers.id, users.username, drivers.location_address, drivers.location_latitude, drivers.location_longitude, drivers.availability, drivers.rating FROM drivers INNER JOIN users ON drivers.id = users.id WHERE users.username = \'' + driverId + '\';';
         }
 
         postgreSQLService.queryExecutor(query).then(function (queryResponse) {
@@ -38,7 +38,7 @@ function getDriversBYIDs(driverIdArr){
 
     return new Promise(function (resolve, reject) {
 
-        let query = 'SELECT ID, username, location_address, location_latitude, location_longitude, driver_availability, driver_rating FROM drivers WHERE username IN (', i;
+        let query = 'SELECT drivers.id, users.username, drivers.location_address, drivers.location_latitude, drivers.location_longitude, drivers.availability, drivers.rating FROM drivers INNER JOIN users ON drivers.id = users.id WHERE users.username IN (', i;
 
         for(i = 0; i < driverIdArr.length; i += 1){
             query = query.concat('\'' + driverIdArr[i] + '\'');
@@ -62,53 +62,61 @@ function insertDriver(driverInfo){
 
     return new Promise(function (resolve, reject) {
 
-        let queryPrefix = 'INSERT INTO drivers(', queryPostfix = ') values(', addToRedis = false, salt = bcrypt.genSaltSync(baseConfig.saltRounds);;
+        let salt = bcrypt.genSaltSync(baseConfig.saltRounds)
 
-        if(driverInfo.username && driverInfo.password){
-            queryPrefix = queryPrefix.concat('username, password');
-            queryPostfix = queryPostfix.concat('\'' + driverInfo.username + '\', \'' + bcrypt.hashSync(driverInfo.password, salt) + '\'');
-        } else{
-            console.log('Username or password missing');
-            return reject({success: false, message: 'Username or password missing'});
-        }
+        let quesry = 'INSERT INTO users(username, password, role) values(\'' + driverInfo.username + '\', \'' + bcrypt.hashSync(driverInfo.password, salt) + '\', \'driver\') RETURNING id, username';
 
-        if(driverInfo.location_address && driverInfo.location_latitude && driverInfo.location_longitude){
-            addToRedis = true;
-            queryPrefix = queryPrefix.concat(', location_address, location_latitude, location_longitude');
-            queryPostfix = queryPostfix.concat(', \'' + driverInfo.location_address + '\', ' + driverInfo.location_latitude + ', ' + driverInfo.location_longitude);
-        }else {
-            console.log('Location information missing');
-            return reject({success: false, message: 'Location information missing'});
-        }
+        postgreSQLService.queryExecutor(quesry).then(function (queryResponse) {
+            if(queryResponse.rowCount > 0){
 
-        if(driverInfo.driver_availability){
-            queryPrefix = queryPrefix.concat(', driver_availability');
-            queryPostfix = queryPostfix.concat(', \'' + driverInfo.driver_availability + '\'');
-        }
+                let queryPrefix = 'INSERT INTO drivers(id', queryPostfix = ') values(' + queryResponse.rows[0].id, addToRedis = false;
 
-        if(driverInfo.driver_rating){
-            queryPrefix = queryPrefix.concat(', driver_rating');
-            queryPostfix = queryPostfix.concat(', \'' + driverInfo.driver_rating + '\'');
-        }
+                if(driverInfo.location_address){
+                    queryPrefix = queryPrefix.concat(', location_address');
+                    queryPostfix = queryPostfix.concat(', \'' + driverInfo.location_address + '\'');
+                }
 
-        queryPostfix = queryPostfix.concat(') RETURNING id, username;');
+                if(driverInfo.location_latitude && driverInfo.location_longitude){
+                    addToRedis = true;
+                    queryPrefix = queryPrefix.concat(', location_latitude, location_longitude');
+                    queryPostfix = queryPostfix.concat(', ' + driverInfo.location_latitude + ', ' + driverInfo.location_longitude);
+                }
 
-        postgreSQLService.queryExecutor(queryPrefix + queryPostfix).then(function (queryResponse) {
+                if(driverInfo.driver_availability){
+                    queryPrefix = queryPrefix.concat(', availability');
+                    queryPostfix = queryPostfix.concat(', \'' + driverInfo.driver_availability + '\'');
+                }
 
-            if(addToRedis){
-                let redisJson = {
-                    key: driverInfo.username,
-                    body: {
-                        latitude: driverInfo.location_latitude,
-                        longitude: driverInfo.location_longitude
+                if(driverInfo.driver_rating){
+                    queryPrefix = queryPrefix.concat(', rating');
+                    queryPostfix = queryPostfix.concat(', \'' + driverInfo.driver_rating + '\'');
+                }
+
+                queryPostfix = queryPostfix.concat(') RETURNING id;');
+
+                postgreSQLService.queryExecutor(queryPrefix + queryPostfix).then(function (queryResponse) {
+
+                    if(addToRedis){
+                        let redisJson = {
+                            key: driverInfo.username,
+                            body: {
+                                latitude: driverInfo.location_latitude,
+                                longitude: driverInfo.location_longitude
+                            }
+                        };
+                        geo_helper.addLocationToRedis(redisJson).then(e => console.log('Successfully added driver to redis.'));
                     }
-                };
-                geo_helper.addLocationToRedis(redisJson).then(e => console.log('Successfully added driver to redis.'));
+
+                    if(queryResponse.rowCount > 0) return resolve({success: true, data: queryResponse.rows[0]});
+                    else return reject({success: false, message: 'Failed to insert driver'});
+
+                }).catch(function (err) {
+                    console.log(err);
+                    return reject({success: false, message: err});
+                });
+
             }
-
-            if(queryResponse.rowCount > 0) return resolve({success: true, data: queryResponse.rows[0]});
             else return reject({success: false, message: 'Failed to insert driver'});
-
         }).catch(function (err) {
             console.log(err);
             return reject({success: false, message: err});
@@ -124,30 +132,35 @@ function updateDriver(username, driverInfo){
 
         getDrivers(username).then(function (response) {
 
-            let temp = response.data[0];
-            for(let key in driverInfo) temp[key] = driverInfo[key];
+            if(response.data.length > 0){
 
-            let query = 'UPDATE drivers SET location_address = \'' + temp.location_address + '\', location_latitude = \'' + temp.location_latitude + '\', location_longitude = \'' + temp.location_longitude + '\', driver_availability = \'' + temp.driver_availability + '\', driver_rating = ' + temp.driver_rating + ' WHERE ID = ' + temp.id + ' RETURNING id, username;';
+                let temp = response.data[0];
 
-            postgreSQLService.queryExecutor(query).then(function (queryResponse) {
+                for(let key in driverInfo) temp[key] = driverInfo[key];
 
-                if(queryResponse.rowCount > 0) {
-                    let redisJson = {
-                        key: temp.username,
-                        body: {
-                            latitude: temp.location_latitude,
-                            longitude: temp.location_longitude
-                        }
-                    };
-                    geo_helper.addLocationToRedis(redisJson).then(e => console.log('Successfully Updated driver to redis.'));
+                let query = 'UPDATE drivers SET location_address = \'' + temp.location_address + '\', location_latitude = \'' + temp.location_latitude + '\', location_longitude = \'' + temp.location_longitude + '\', availability = \'' + temp.driver_availability + '\', rating = ' + temp.driver_rating + ' WHERE ID = ' + temp.id + ' RETURNING id;';
 
-                    return resolve({success: true, data: queryResponse.rows[0]});
-                } else return reject({success: false, message: 'Failed to update driver'});
+                postgreSQLService.queryExecutor(query).then(function (queryResponse) {
 
-            }).catch(function (err) {
-                console.log(err);
-                return reject({success: false, message: err});
-            });
+                    if(queryResponse.rowCount > 0) {
+                        let redisJson = {
+                            key: temp.username,
+                            body: {
+                                latitude: temp.location_latitude,
+                                longitude: temp.location_longitude
+                            }
+                        };
+                        geo_helper.addLocationToRedis(redisJson).then(e => console.log('Successfully Updated driver to redis.'));
+
+                        return resolve({success: true, data: queryResponse.rows[0]});
+                    } else return reject({success: false, message: 'Failed to update driver'});
+
+                }).catch(function (err) {
+                    console.log(err);
+                    return reject({success: false, message: err});
+                });
+
+            }else return reject({success: false, message: 'No diver Found driver'});
 
         }).catch(function (err) {
             console.log(err);

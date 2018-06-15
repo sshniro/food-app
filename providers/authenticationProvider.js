@@ -18,7 +18,7 @@ function authenticateDriver(auth){
 
         auth.hashedPassword = bcrypt.hashSync(auth.password, baseConfig.saltRounds);
 
-        let query = 'SELECT * FROM drivers WHERE username = \'' + auth.username + '\';';
+        let query = 'SELECT * FROM users WHERE username = \'' + auth.username + '\';';
 
         driverService.queryExecutor(query).then(function (queryResponse) {
 
@@ -52,7 +52,7 @@ function authorizeDriver(token){
         jwt.verify(token, baseConfig.secret, function(err, decoded) {
             if (err) return reject({ authentication: false, message: 'Failed to authenticate token.' });
 
-            let query = 'SELECT id, username, location_address, location_latitude, location_longitude, driver_availability FROM drivers WHERE username = \'' + decoded.id + '\';';
+            let query = 'SELECT * FROM users WHERE username = \'' + decoded.id + '\';';
 
             driverService.queryExecutor(query).then(function (queryResponse) {
 
@@ -82,7 +82,7 @@ function authorizeDriverV2(req, res, next){
     }else{
 
         authorizeDriver(token).then(function (response) {
-            req.user = {role: 'driver', username: response.data.username, id: response.data.id};
+            req.user = {role: response.data.role, username: response.data.username, id: response.data.id};
             next();
         }).catch(function (err) {
             res.status(401).json(err);

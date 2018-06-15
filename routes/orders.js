@@ -11,6 +11,8 @@ const geo_helper = require('../geo-helper.js');
 /* GET All orders */
 router.get('/v2', function(req, res, next){
 
+    console.log('came')
+
     let orderId = req.query.orderId || '';
 
     orderQueryBuilderProvider.getOrders(orderId).then(function (response) {
