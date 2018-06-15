@@ -129,6 +129,17 @@ function addLocationToRedis(location) {
     });
 }
 
+function getLocationsFromRedis(locationSet) {
+    geo.locations(locationSet, function(err, locations){
+        if(err) console.error(err)
+        else {
+            for(let locationName in locations){
+                console.log(locationName + "'s location is:", locations[locationName].latitude, locations[locationName].longitude)
+            }
+        }
+    });
+}
+
 function removeLocationsFromRedis(locationsArray) {
     return new Promise(function (resolve, reject) {
         geo.removeLocations(locationsArray, function (err, reply) {
@@ -164,5 +175,6 @@ module.exports = {
     persistInRedis: persistInRedis,
     getFromRedis: getFromRedis,
     locationSet: locationSet,
-    destinationJsonSet: destinationJsonSet
+    destinationJsonSet: destinationJsonSet,
+    getLocationsFromRedis: getLocationsFromRedis
 };

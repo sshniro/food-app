@@ -7,8 +7,8 @@ const configs = require('./config/baseConfig');
 const mapsUtilHelper = require('./mapsUtilHelper.js');
 
 module.exports = {
-    getDriverGroupedByDistanceAndSortByRating: getDriverGroupedByDistanceAndSortByRating,
-    findAvailableDrivers: findAvailableDrivers
+    findAvailableDrivers: findAvailableDrivers,
+    getDriverGroupedByDistanceAndSortByRating: getDriverGroupedByDistanceAndSortByRating
 };
 
 function findAvailableDrivers(destinationJson, notify){

@@ -1,12 +1,13 @@
 'use strict';
 
-const driverService = require('../services/driverService.js');
+const postgreSQLService = require('../services/postgreSQLService.js');
 const geo_helper = require('../geo-helper.js');
 const bcrypt = require('bcryptjs');
 const baseConfig = require('../config/baseConfig.js');
 
 module.exports = {
     getDrivers: getDrivers,
+    getDriversBYIDs: getDriversBYIDs,
     insertDriver: insertDriver,
     updateDriver: updateDriver
 };
@@ -18,12 +19,36 @@ function getDrivers(driverId){
         let query;
 
         if(driverId === ''){
-            query = 'SELECT ID, username, location_address, location_latitude, location_longitude, driver_availability FROM drivers ORDER BY id ASC;';
+            query = 'SELECT ID, username, location_address, location_latitude, location_longitude, driver_availability, driver_rating FROM drivers ORDER BY id ASC;';
         }else{
-            query = 'SELECT ID, username, location_address, location_latitude, location_longitude, driver_availability FROM drivers WHERE username = \'' + driverId + '\';';
+            query = 'SELECT ID, username, location_address, location_latitude, location_longitude, driver_availability, driver_rating FROM drivers WHERE username = \'' + driverId + '\';';
         }
 
-        driverService.queryExecutor(query).then(function (queryResponse) {
+        postgreSQLService.queryExecutor(query).then(function (queryResponse) {
+            return resolve({success: true, data: queryResponse.rows});
+        }).catch(function (err) {
+            console.log(err);
+            return reject({success: false, message: err});
+        });
+
+    });
+}
+
+function getDriversBYIDs(driverIdArr){
+
+    return new Promise(function (resolve, reject) {
+
+        let query = 'SELECT ID, username, location_address, location_latitude, location_longitude, driver_availability, driver_rating FROM drivers WHERE username IN (', i;
+
+        for(i = 0; i < driverIdArr.length; i += 1){
+            query = query.concat('\'' + driverIdArr[i] + '\'');
+
+            if(i + 1 !== driverIdArr.length) query = query.concat(', ');
+        }
+
+        query = query.concat(');');
+
+        postgreSQLService.queryExecutor(query).then(function (queryResponse) {
             return resolve({success: true, data: queryResponse.rows});
         }).catch(function (err) {
             console.log(err);
@@ -66,10 +91,9 @@ function insertDriver(driverInfo){
             queryPostfix = queryPostfix.concat(', \'' + driverInfo.driver_rating + '\'');
         }
 
-        queryPostfix = queryPostfix.concat(');');
+        queryPostfix = queryPostfix.concat(') RETURNING id, username;');
 
-
-        driverService.queryExecutor(queryPrefix + queryPostfix).then(function (queryResponse) {
+        postgreSQLService.queryExecutor(queryPrefix + queryPostfix).then(function (queryResponse) {
 
             if(addToRedis){
                 let redisJson = {
@@ -82,7 +106,10 @@ function insertDriver(driverInfo){
                 geo_helper.addLocationToRedis(redisJson).then(e => console.log('Successfully added driver to redis.'));
             }
 
-            return resolve({success: true, data: queryResponse});
+            if(queryResponse.rowCount > 0) return resolve({success: true, data: queryResponse.rows[0]});
+            else return reject({success: false, message: 'Failed to insert driver'});
+
+
         }).catch(function (err) {
             console.log(err);
             return reject({success: false, message: err});
@@ -122,7 +149,7 @@ function updateDriver(username, driverInfo){
 
             queryPrefix = queryPrefix.concat(' WHERE ID = ' + response.data[0].id) + ';';
 
-            driverService.queryExecutor(queryPrefix).then(function (queryResponse) {
+            postgreSQLService.queryExecutor(queryPrefix).then(function (queryResponse) {
 
                 let redisJson = {
                     key: driverInfo.username,

@@ -4,6 +4,7 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const pg = require('pg');
+const fs = require('fs');
 
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
@@ -53,8 +54,9 @@ app.use(function(err, req, res, next) {
 
 
 // geo_helper.addLocationsToRedis(geo_helper.locationSet).then(e => console.log('Successfully initialized drivers.'));
+
 geo_helper.addLocationsToRedis(geo_helper.locationSet).then(function (res) {
-    console.log('Successfully initialized drivers.')
+    console.log('Successfully initialized drivers.');
 
     for(let i = 0; i < geo_helper.destinationJsonSet.length; i += 1){
         driverUtilHelper.findAvailableDrivers(geo_helper.destinationJsonSet[i], true).then(function (response) {
@@ -65,6 +67,7 @@ geo_helper.addLocationsToRedis(geo_helper.locationSet).then(function (res) {
     }
 });
 
+// initDatabase();
 
 
 console.log('UI: http://localhost:8080/food_app/index.html')
@@ -83,49 +86,18 @@ if (module === require.main) {
     });
 }
 
-initDatabase();
-
 function initDatabase(){
 
-    const dropItemsTableSQLQuery = 'DROP TABLE drivers';
-    const createItemsTableSQLQuery = 'CREATE TABLE drivers(\n' +
-        '    ID serial NOT NULL PRIMARY KEY,\n' +
-        '    username VARCHAR(20) UNIQUE, \n' +
-        '    password VARCHAR(256) not null,\n' +
-        '    location_address VARCHAR(255),\n' +
-        '    location_latitude DOUBLE PRECISION,\n' +
-        '    location_longitude DOUBLE PRECISION,\n' +
-        '    driver_availability VARCHAR(20),\n' +
-        '    driver_rating real)';
-
-    // dropTable(dropItemsTableSQLQuery, createItemsTableSQLQuery);
-}
-
-function dropTable(dropQuery, createQuery){
-
     client.connect();
-    const queryDropTable = client.query(dropQuery);
+    let sql = fs.readFileSync('./init_database.sql').toString();
 
-    queryDropTable.then(function (queryDropTableResponse) {
-        createTable(createQuery);
-    }).catch(function (err) {
-        createTable(createQuery);
-    });
-
-}
-
-function createTable(createQuery){
-
-    const queryCreateTable = client.query(createQuery);
-
-    queryCreateTable.then(function (queryCreateTableResponse) {
-        console.log('Successfully created table');
-        client.end();
-    }).catch(function (err) {
-        console.log(err);
+    client.query(sql, function(err, result){
+        if(err){
+            console.log('error: ', err);
+        }
+        console.log('Database init Success;');
         client.end();
     });
-
 }
 
 module.exports = app;

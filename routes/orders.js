@@ -3,9 +3,56 @@
 const express = require('express');
 const router = express.Router();
 
+const authenticationProvider = require('../providers/authenticationProvider.js');
+const orderQueryBuilderProvider = require('../providers/orderQueryBuilderProvider.js');
 const geo_helper = require('../geo-helper.js');
 
-/* GET driver listing from destination */
+
+/* GET New */
+router.get('/v2', function(req, res, next){
+
+    let orderId = req.query.orderId || '';
+
+    orderQueryBuilderProvider.getOrders(orderId).then(function (response) {
+        return res.status(200).json(response);
+    }).catch(function (err) {
+        return res.status(500).json(err);
+    });
+
+});
+
+router.get('/complete/v2', function(req, res, next){
+
+    let orderId = req.query.orderId;
+
+    if(!orderId){
+        return res.status(500).json({success: false, message: 'Need orderId to continue'});
+    }
+
+    orderQueryBuilderProvider.getCompleteOrder(orderId).then(function (response) {
+        return res.status(200).json(response);
+    }).catch(function (err) {
+        return res.status(500).json(err);
+    });
+
+});
+
+router.post('/accept/v2', function(req, res, next){
+
+    let oderJson = {
+        orderId: req.body.orderId || 1,
+        driverId: req.body.driverId || 1
+    };
+
+    orderQueryBuilderProvider.acceptOrder(oderJson).then(function (response) {
+        return res.status(200).json(response);
+    }).catch(function (err) {
+        return res.status(500).json(err);
+    });
+});
+
+
+/* Old */
 router.get('/', function(req, res, next) {
 
     let orderJson = {

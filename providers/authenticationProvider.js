@@ -1,8 +1,6 @@
 'use strict';
 
-const sha256 = require('sha256')
-
-const driverService = require('../services/driverService.js');
+const driverService = require('../services/postgreSQLService.js');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const baseConfig = require('../config/baseConfig.js');
@@ -26,12 +24,12 @@ function authenticateDriver(auth){
 
             if(queryResponse.rowCount > 0){
 
-                let passwordIsValid = bcrypt.compareSync(auth.password, queryResponse.rows[0].password)
+                let passwordIsValid = bcrypt.compareSync(auth.password, queryResponse.rows[0].password);
 
                 if(!passwordIsValid) reject({success: false, message: 'Username or password wrong'});
 
                 let token = jwt.sign({ id: auth.username }, baseConfig.secret, {
-                    expiresIn: 86400 // 24 hours
+                    expiresIn: baseConfig.jwtTokenExpireTime
                 });
 
                 return resolve({success: true, message: 'Authorization Successful', token: token});

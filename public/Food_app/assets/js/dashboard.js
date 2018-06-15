@@ -85,15 +85,6 @@ let functions = {
 
             functions.populateTableRow(response);
 
-            functions.addMarker(originSplit[0], originSplit[1]);
-            functions.addMarker(destinationSplit[0], destinationSplit[1]);
-            map.setCenter(new google.maps.LatLng(destinationSplit[0], destinationSplit[1]));
-
-/*
-*
-*              Route Display from origin to destination
-*
-*
             let request = {
                 origin: new google.maps.LatLng(originSplit[0], originSplit[1]),
                 destination: new google.maps.LatLng(destinationSplit[0], destinationSplit[1]),
@@ -108,10 +99,11 @@ let functions = {
                         directionsDisplay.setDirections(response);
                     }
                 } else {
-                    console.log('Failed to get the direction');
+                    functions.addMarker(originSplit[0], originSplit[1]);
+                    functions.addMarker(destinationSplit[0], destinationSplit[1]);
+                    map.setCenter(new google.maps.LatLng(destinationSplit[0], destinationSplit[1]));
                 }
             });
-            */
 
         });
     }, populateTableRow: function(populatingData) {
