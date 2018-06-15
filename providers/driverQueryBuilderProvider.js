@@ -124,38 +124,19 @@ function updateDriver(username, driverInfo){
 
         getDrivers(username).then(function (response) {
 
-            let queryPrefix = 'UPDATE drivers SET ';
+            let temp = response.data[0];
+            for(let key in driverInfo) temp[key] = driverInfo[key];
 
-            if(driverInfo.location_address && driverInfo.location_latitude && driverInfo.location_longitude){
-                queryPrefix = queryPrefix.concat('location_address = \'' + driverInfo.location_address + '\', location_latitude = ' + driverInfo.location_latitude + ', location_longitude = ' + driverInfo.location_longitude);
+            let query = 'UPDATE drivers SET location_address = \'' + temp.location_address + '\', location_latitude = \'' + temp.location_latitude + '\', location_longitude = \'' + temp.location_longitude + '\', driver_availability = \'' + temp.driver_availability + '\', driver_rating = ' + temp.driver_rating + ' WHERE ID = ' + temp.id + ' RETURNING id, username;';
 
-                if(driverInfo.driver_availability){
-                    queryPrefix = queryPrefix.concat(', driver_availability = \'' + driverInfo.driver_availability + '\'');
-                }
-
-                if(driverInfo.driver_rating){
-                    queryPrefix = queryPrefix.concat(', driver_rating = ' + driverInfo.driver_rating);
-                }
-
-            }else {
-
-                let temp = response.data[0];
-                for(let key in driverInfo) temp[key] = driverInfo[key];
-
-                queryPrefix = queryPrefix.concat('driver_availability = \'' + response.data[0].driver_availability + '\'');
-                queryPrefix = queryPrefix.concat(', driver_rating = ' + response.data[0].driver_rating);
-            }
-
-            queryPrefix = queryPrefix.concat(' WHERE ID = ' + response.data[0].id) + ' RETURNING id, username;';
-
-            postgreSQLService.queryExecutor(queryPrefix).then(function (queryResponse) {
+            postgreSQLService.queryExecutor(query).then(function (queryResponse) {
 
                 if(queryResponse.rowCount > 0) {
                     let redisJson = {
-                        key: driverInfo.username,
+                        key: temp.username,
                         body: {
-                            latitude: driverInfo.location_latitude,
-                            longitude: driverInfo.location_longitude
+                            latitude: temp.location_latitude,
+                            longitude: temp.location_longitude
                         }
                     };
                     geo_helper.addLocationToRedis(redisJson).then(e => console.log('Successfully Updated driver to redis.'));

@@ -59,19 +59,19 @@ app.use(function(err, req, res, next) {
 
 // geo_helper.addLocationsToRedis(geo_helper.locationSet).then(e => console.log('Successfully initialized drivers.'));
 
-geo_helper.addLocationsToRedis(geo_helper.locationSet).then(function (res) {
-    console.log('Successfully initialized drivers.');
+// geo_helper.addLocationsToRedis(geo_helper.locationSet).then(function (res) {
+//     console.log('Successfully initialized drivers.');
+//
+//     for(let i = 0; i < geo_helper.destinationJsonSet.length; i += 1){
+//         driverUtilHelper.findAvailableDrivers(geo_helper.destinationJsonSet[i], true).then(function (response) {
+//             console.log(response);
+//         }).catch(function (err) {
+//             console.log(err);
+//         });
+//     }
+// });
 
-    for(let i = 0; i < geo_helper.destinationJsonSet.length; i += 1){
-        driverUtilHelper.findAvailableDrivers(geo_helper.destinationJsonSet[i], true).then(function (response) {
-            console.log(response);
-        }).catch(function (err) {
-            console.log(err);
-        });
-    }
-});
-
-// initDatabase();
+initDatabase();
 
 console.log('UI: http://localhost:8080/food_app/index.html')
 console.log('Google Maps API: GET http://localhost:8080/maps/distancematrix/')
